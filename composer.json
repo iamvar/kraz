@@ -1,0 +1,48 @@
+{
+  "name": "core/kraz",
+  "license": "proprietary",
+  "type": "project",
+  "require": {
+    "php": "^7.3",
+    "ext-PDO": "*",
+    "ext-pdo_mysql": "*",
+    "ext-json": "*",
+    "ext-redis": "*",
+    "ext-curl": "*",
+    "symfony/console": "^4.4",
+    "symfony/dependency-injection": "^4.4",
+    "symfony/yaml": "^4.4",
+    "symfony/config": "^4.4",
+    "symfony/http-kernel": "^4.4",
+    "doctrine/dbal": "^2.9",
+    "php-curl-class/php-curl-class": "^8.5",
+    "symfony/lock": "^4.4",
+    "symfony/monolog-bundle": "^3.3",
+    "graylog2/gelf-php": "^1.6",
+    "doctrine/doctrine-bundle": "^1.11",
+    "incenteev/composer-parameter-handler": "^2.1",
+    "core/message-broker-client": "^1.0"
+  },
+  "scripts": {
+    "cmd": [
+      "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters"
+    ],
+    "post-install-cmd": [
+      "@cmd"
+    ],
+    "post-update-cmd": [
+      "@cmd"
+    ]
+  },
+  "extra": {
+    "incenteev-parameters": {
+      "file": "config/parameters.yml",
+      "dist-file": "config/parameters.yml.j2"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Kraz\\": "src/"
+    }
+  }
+}

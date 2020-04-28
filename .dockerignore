@@ -1,0 +1,12 @@
+*.md
+.git*
+docker/mysql/data
+docker-compose.yml
+docker-compose.test.yml
+Dockerfile
+var/*
+.dockerignore
+.idea
+*.env
+.env.dist
+crontab

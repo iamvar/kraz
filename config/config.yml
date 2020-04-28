@@ -1,0 +1,34 @@
+imports:
+  - { resource: parameters.yml }
+  - { resource: services.yml }
+
+framework:
+  secret: '%secret%'
+
+doctrine:
+  dbal:
+    connections:
+      ct:
+        driver: pdo_mysql
+        host: '%db.ct.host%'
+        port: '%db.ct.port%'
+        dbname: '%db.ct.name%'
+        user: '%db.ct.user%'
+        password: '%db.ct.password%'
+        charset: UTF8
+      my_source1:
+        driver: pdo_mysql
+        host: '%db.my_source1.host%'
+        port: '%db.my_source1.port%'
+        dbname: '%db.my_source1.name%'
+        user: '%db.my_source1.user%'
+        password: '%db.my_source1.password%'
+        charset: UTF8
+      my_source2:
+        driver: pdo_mysql
+        host: '%db.my_source2.host%'
+        port: '%db.my_source2.port%'
+        dbname: '%db.my_source2.name%'
+        user: '%db.my_source2.user%'
+        password: '%db.my_source2.password%'
+        charset: UTF8

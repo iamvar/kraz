@@ -1,0 +1,92 @@
+variables:
+  CUSTOM_PROJECT_NAME: "kraz-aggregator"
+  PHP_VERSION: "7.3"
+
+stages:
+  - test
+  - build
+  - deploy
+  - trigger-prod
+
+linter:
+  stage: test
+  allow_failure: false
+  tags:
+    - docker
+  image: registry.gitlab.local/wdd/docker/php/php-ci-cli:${PHP_VERSION}-kraz_1
+  script:
+    - find src -name '*.php' -print0 | xargs -0 -n1 php -l
+
+build:
+  stage: build
+  allow_failure: false
+  image: registry.gitlab.local/wdd/docker/php/php-ci-cli:${PHP_VERSION}-kraz_1
+  tags:
+    - docker
+  script:
+    - cp $CI_PROJECT_DIR/config/parameters.yml.j2 $CI_PROJECT_DIR/config/parameters.yml
+    - APP_ENV=prod composer install --no-dev --optimize-autoloader --no-scripts
+  artifacts:
+    paths:
+      # application paths
+      - bin
+      - config
+      - src
+      - vendor
+      - crontab
+      - health_check.php
+      # deployment procedure paths
+      - ansistrano
+      - .rsync-filter
+    expire_in: 1 day
+
+deploy-trunk:
+  variables:
+    GIT_STRATEGY: none
+  stage: deploy
+  allow_failure: false
+  image: registry.gitlab.local/devops/docker/ansistrano/mitogen:0.2.7-hashivault
+  tags:
+    - docker
+  script:
+    - ansible-playbook -i ansistrano/trunk ansistrano/deploy.yml -e "ansistrano_release_version=`date +%Y%m%d%H%M%S`"
+  dependencies: [build]
+  only:
+    - "trunk"
+
+deploy-staging:
+  variables:
+    GIT_STRATEGY: none
+  stage: deploy
+  allow_failure: false
+  image: registry.gitlab.local/devops/docker/ansistrano/mitogen:0.2.7-hashivault
+  tags:
+    - docker
+  script:
+    - >
+      export VAULT_ADDR=$VAULT_ADDR_STAGING;
+      export VAULT_ROLE_ID=$VAULT_ROLE_ID_STAGING;
+      export VAULT_SECRET_ID=$VAULT_SECRET_ID_STAGING;
+      ansible-playbook -i ansistrano/staging ansistrano/deploy.yml -e "ansistrano_release_version=`date +%Y%m%d%H%M%S`"
+  dependencies: [build]
+  only:
+    - "master"
+
+rollback-staging:
+  variables:
+    GIT_STRATEGY: none
+  stage: deploy
+  allow_failure: true
+  image: registry.gitlab.local/devops/docker/ansistrano/mitogen:0.2.7-hashivault
+  tags:
+    - docker
+  script:
+    - >
+      export VAULT_ADDR=$VAULT_ADDR_STAGING;
+      export VAULT_ROLE_ID=$VAULT_ROLE_ID_STAGING;
+      export VAULT_SECRET_ID=$VAULT_SECRET_ID_STAGING;
+      ansible-playbook -i ansistrano/staging ansistrano/rollback.yml -e "ansistrano_release_version=`date +%Y%m%d%H%M%S`"
+  dependencies: [build]
+  when: manual
+  only:
+    - "master"

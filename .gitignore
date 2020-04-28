@@ -1,0 +1,8 @@
+/config/parameters.yml
+/build/
+/phpunit.xml
+/var/*
+!.keep
+/vendor/
+/crontab
+/.cert

@@ -1,0 +1,52 @@
+parameters:
+
+  kraz.api.url: '{{ }}'
+  kraz.api.key: '{{ kraz_api_key }}'
+  redis.host: "{{ redis_hostname }}"
+  redis.port: 6379
+
+  icinga.url: "{{ icinga_url }}"
+  icinga.login: "{{ icinga_user }}"
+  icinga.password: "{{ icinga_password }}"
+
+  graylog.hostname: "{{ graylog_hostname }}"
+  graylog.port: 12201
+
+  db.ct.host: "{{ ct_db_host }}"
+  db.ct.port: 3306
+  db.ct.name: ct
+  db.ct.user: "{{ db_ct_user }}"
+  db.ct.password: "{{ db_ct_password }}"
+
+  db.my_source1.host: "{{ my_source1_db_host }}"
+  db.my_source1.port: 3306
+  db.my_source1.name: my_source1
+  db.my_source1.user: "{{ db_my_source1_user }}"
+  db.my_source1.password: "{{ db_my_source1_password }}"
+  
+  db.my_source2.host: "{{ my_source2_db_host }}"
+  db.my_source2.port: 3306
+  db.my_source2.name: my_source2
+  db.my_source2.user: "{{ db_my_source2_user }}"
+  db.my_source2.password: "{{ db_my_source2_password }}"
+  
+  # Here is config for message broker (now it is based on Kafka clusters)
+  # E.g.:
+  #
+  # trunk:
+  message_broker:
+{% for cluster, config in message_brokers.items() %}
+    {{ cluster }}:
+      broker_list: {{ config.broker_list }}
+      consumer_group: {{ config.consumer_group }}
+      kafka_config:
+        security.protocol: 'SASL_SSL'
+        ssl.certificate.location: {{ config.ssl_certificate_location }}
+        ssl.key.location: {{ config.ssl_key_location }}
+        ssl.key.password: {{ config.ssl_key_password }}
+        sasl.mechanisms: 'PLAIN'
+        sasl.username: {{ config.sasl_username }}
+        sasl.password: {{ config.sasl_password }}
+{% endfor %}
+
+  secret: "{{ secret }}"

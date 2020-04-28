@@ -1,0 +1,71 @@
+imports:
+  - { resource: commands.yml }
+
+services:
+  _defaults:
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    public: false       # Allows optimizing the container by removing unused services; this also means
+    # fetching services directly from the container via $container->get() won't work.
+    # The best practice is to be explicit about your dependencies anyway.
+
+  Curl\Curl: ~
+
+  Gelf\Transport\UdpTransport:
+    arguments: ['%graylog.hostname%', '%graylog.port%']
+  Gelf\Publisher:
+    arguments: ['@Gelf\Transport\UdpTransport']
+  monolog.gelf_handler:
+    class: Monolog\Handler\GelfHandler
+    arguments: ['@Gelf\Publisher']
+
+  Kraz\Logger\PidProcessor:
+    tags:
+      - { name: monolog.processor, method: processRecord }
+
+  Kraz\Service\DeduplicationService: ~
+
+  Kraz\Service\KrazApiManager:
+    bind:
+      $baseUrl: '%kraz.api.url%'
+      $apiKey: '%kraz.api.key%'
+
+  Kraz\Service\RedisService:
+    bind:
+      $host: '%redis.host%'
+      $port: '%redis.port%'
+
+  IcingaMonitoring:
+    class: Kraz\Service\Monitoring\IcingaMonitoring
+    arguments:
+      - '%icinga.url%'
+      - '%icinga.login%'
+      - '%icinga.password%'
+
+  Kraz\Service\ConnectionsConfiguratorService: ~
+
+  Kraz\Repository\CT\FollowerRepository:
+    arguments:
+      - '@doctrine.dbal.ct_connection'
+
+  Kraz\Repository\CT\FollowerCachingRepository: ~
+
+
+  Kraz\Repository\CT\LeaderRepository:
+    arguments:
+      - '@doctrine.dbal.ct_connection'
+
+  Kraz\Repository\CT\LeaderCachingRepository: ~
+
+
+  Kraz\Repository\CT\SettingRepository:
+    arguments:
+      - '@doctrine.dbal.ct_connection'
+
+  Kraz\Service\MessageBrokerService:
+    arguments:
+      - '%message_broker%'
+  Kraz\Handler\HandlerFactory: ~
+  Kraz\Processor\OrderPlacedProcessor: ~
+  Kraz\Repository\My\AllAccountRepository: ~
+  Kraz\Repository\My\AllAccountCachingRepository: ~
