@@ -20,8 +20,7 @@
     "symfony/monolog-bundle": "^3.3",
     "graylog2/gelf-php": "^1.6",
     "doctrine/doctrine-bundle": "^1.11",
-    "incenteev/composer-parameter-handler": "^2.1",
-    "core/message-broker-client": "^1.0"
+    "incenteev/composer-parameter-handler": "^2.1"
   },
   "scripts": {
     "cmd": [
